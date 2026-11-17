@@ -13,8 +13,8 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 
 | # | Feature | Phase | Status |
 |---|---------|-------|--------|
-| 1 | Stack & architecture | Foundation | in-progress |
-| 2 | Coding standards & tooling | Foundation | planned |
+| 1 | Stack & architecture | Foundation | done |
+| 2 | Coding standards & tooling | Foundation | done |
 | 3 | Photo to 3D model | Release 1 | planned |
 | 4 | Place the model in AR | Release 1 | planned |
 | 5 | Release APK | Release 1 | planned |
@@ -33,7 +33,7 @@ spec [0001](../specs/0001-android-stack-architecture/index.md) · code in `app/`
 ### 2. Coding standards & tooling
 A light pass that records conventions and the build and run commands in `AGENTS.md`, so later steps (and the APK build) stay consistent. It's quick, and you can skip it if you're short on time.
 **Done when:** root `AGENTS.md` describes the real project and how to run it on the device.
-- [ ] Capture conventions + tooling choices: `/audit`
+- [x] Capture conventions + tooling choices: `/audit`
 
 ## Release 1: Photo to 3D to AR (the demo)
 
