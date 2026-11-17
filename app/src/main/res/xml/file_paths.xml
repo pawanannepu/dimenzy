@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The system camera writes cacheDir/photos/capture.jpg through this provider. Nothing else is exposed. -->
+<paths>
+    <cache-path name="photos" path="photos/" />
+</paths>

@@ -71,4 +71,10 @@ dependencies {
 
   // 3D preview and ARCore placement (includes the 3D only sceneview module).
   implementation(libs.sceneview.ar)
+
+  // Stable Fast 3D over HTTP (spec 0001). No JSON converter: multipart in, GLB bytes out.
+  implementation(libs.retrofit)
+  implementation(libs.okhttp)
+  // Reads the photo's EXIF rotation so the upload is upright.
+  implementation(libs.androidx.exifinterface)
 }

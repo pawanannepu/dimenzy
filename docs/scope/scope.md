@@ -15,7 +15,7 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 |---|---------|-------|--------|
 | 1 | Stack & architecture | Foundation | done |
 | 2 | Coding standards & tooling | Foundation | done |
-| 3 | Photo to 3D model | Release 1 | planned |
+| 3 | Photo to 3D model | Release 1 | done |
 | 4 | Place the model in AR | Release 1 | planned |
 | 5 | Release APK | Release 1 | planned |
 | 6 | Saved model library | Release 2 | planned |
@@ -37,10 +37,16 @@ A light pass that records conventions and the build and run commands in `AGENTS.
 
 ## Release 1: Photo to 3D to AR (the demo)
 
-### 3. Photo to 3D model · needs a decision
+### 3. Photo to 3D model
 Take a photo with the camera or pick one from the gallery, send it to the AI service, and get back a 3D model of the main object. Keep the screens simple and clean, with no separate design system.
 **Done when:** you can pick or take a photo, you see a progress state while it generates, you get a 3D model you can preview and spin on screen, and a failure (no internet, service error, timeout) shows a clear message with a retry.
-- [ ] Design it (spec): `/architect photo to 3D model`
+spec [0002](../specs/0002-photo-to-3d-model.md) · code in `app/src/main/kotlin/com/dimenzy/app/`
+- [x] Design it (spec): `/architect photo to 3D model`
+- [x] Build it: `/develop photo to 3D model`
+  - [x] Slice 1: sample model preview with load failure handling, no credits needed (AC-1, AC-8, AC-9, AC-12)
+  - [x] Slice 2: gallery pick, photo prep and thumbnail, generate, save, preview (AC-3, AC-4, AC-5, AC-6, AC-7, AC-11, AC-13)
+  - [x] Slice 3: camera capture through the FileProvider, behind the permission (AC-2, AC-4)
+  - [x] Slice 4: every generation error has its message, Retry, and next step, then a full phone check (AC-10, AC-11)
 
 ### 4. Place the model in AR · needs a decision
 Open the camera in AR, find a floor or table surface, and tap to place the generated model. Pinch to scale, twist or drag to rotate.
