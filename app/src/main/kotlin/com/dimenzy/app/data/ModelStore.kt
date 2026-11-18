@@ -24,16 +24,21 @@ class ModelStore(private val modelsDir: File) {
   }
 
   /**
-   * `"sample.glb"` (an asset path) for [SAMPLE_ID], a `file://` location for a saved model,
-   * or `null` when the id is malformed or the file is missing. Only a canonical UUID is accepted,
-   * so a route argument can never point outside `filesDir/models/`.
+   * An asset path for a bundled sample ([SAMPLE_MODELS]), a `file://` location for a saved model,
+   * or `null` when the id is malformed or the file is missing. Only a canonical UUID is accepted
+   * for saved models, so a route argument can never point outside `filesDir/models/`.
    */
   fun locationFor(modelId: String): String? {
-    if (modelId == SAMPLE_ID) return SAMPLE_ASSET
+    sampleFor(modelId)?.let { return it.asset }
     if (!isCanonicalUuid(modelId)) return null
     val file = File(modelsDir, "$modelId.glb")
     return if (file.isFile) "file://${file.absolutePath}" else null
   }
+
+  /** The clip to loop for [modelId]; `null` means the file's first clip (generated models have none). */
+  fun animationFor(modelId: String): String? = sampleFor(modelId)?.animation
+
+  private fun sampleFor(modelId: String): SampleModel? = SAMPLE_MODELS.firstOrNull { it.id == modelId }
 
   private fun isCanonicalUuid(id: String): Boolean =
     try {
@@ -41,9 +46,4 @@ class ModelStore(private val modelsDir: File) {
     } catch (e: IllegalArgumentException) {
       false
     }
-
-  companion object {
-    const val SAMPLE_ID = "sample"
-    private const val SAMPLE_ASSET = "sample.glb"
-  }
 }

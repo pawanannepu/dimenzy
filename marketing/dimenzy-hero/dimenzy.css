@@ -1,0 +1,554 @@
+/* Dimenzy's README hero. Every rule is scoped under .dz.
+   Colors are Dimenzy's Material 3 light scheme (app/.../ui/theme/Color.kt);
+   type is Roboto, the app's FontFamily.Default on Android. Screen geometry is
+   in dp: inside the Pixel frame the screen is laid out at 412 x 915. */
+
+@font-face {
+  font-family: 'Dimenzy Roboto';
+  src: url('./assets/roboto-latin.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: block;
+}
+
+.dz {
+  & .ss-stage {
+    /* Material 3 roles, from Color.kt */
+    --dz-primary: #00506e;
+    --dz-on-primary: #ffffff;
+    --dz-secondary-container: #cfeafd;
+    --dz-on-secondary-container: #344d5c;
+    --dz-background: #f7f9fd;
+    --dz-on-surface: #191c1f;
+    --dz-on-surface-variant: #40484e;
+    --dz-outline: #70787e;
+    --dz-container-high: #e6e8ec;
+    /* The AR screen's CameraScrim: black at 55% */
+    --dz-scrim: rgba(0, 0, 0, 0.55);
+    /* Travel inside a screen, and a quick UIKit-like open */
+    --dz-house: cubic-bezier(0.45, 0, 0.1, 1);
+    --dz-settle: cubic-bezier(0.25, 0.8, 0.25, 1);
+
+    --ss-accent: var(--dz-primary);
+    --ss-accent-2: var(--dz-primary);
+    --ss-font: 'Dimenzy Roboto', Roboto, system-ui, sans-serif;
+    --ss-text-strong: var(--dz-on-surface);
+    --ss-text: var(--dz-on-surface-variant);
+
+    overflow: hidden;
+    border-radius: 14px;
+    background: #eef2f5;
+    font-family: var(--ss-font);
+  }
+
+  /* A cool wash in the app's own blues, lit from above */
+  .dz-wash {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(70% 45% at 50% 0%, rgba(135, 207, 249, 0.32), transparent 72%),
+      radial-gradient(80% 50% at 50% 100%, rgba(207, 234, 253, 0.5), transparent 70%);
+  }
+
+  /* Pinned from the top, centered, one gutter, off the bottom by a full 24px */
+  .dz-phone {
+    position: absolute;
+    top: 44px;
+    left: 44px;
+  }
+
+  .ss-stage[data-layout="compact"] .dz-phone {
+    top: 16px;
+    left: 16px;
+  }
+
+  .dz-phone .ss-phone__status {
+    transition: color 0.3s ease;
+  }
+
+  /* Under the status bar and camera hole, over the screen */
+  .dz-screens {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  /* ---- Buttons: the kit's Button in Material 3's shapes ---- */
+
+  .dz-btn {
+    --ss-button-height: 48px;
+    --ss-button-pad: 24px;
+    width: 100%;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.1px;
+    line-height: 20px;
+  }
+
+  .dz-btn--tall {
+    --ss-button-height: 56px;
+    font-size: 16px;
+    letter-spacing: 0.15px;
+    line-height: 24px;
+  }
+
+  .dz-btn--filled {
+    color: var(--dz-on-primary);
+    background: var(--dz-primary);
+  }
+
+  .dz-btn--filled[data-hover] {
+    background: color-mix(in srgb, var(--dz-primary), #fff 8%);
+  }
+
+  .dz-btn--outlined {
+    color: var(--dz-primary);
+    background: transparent;
+    box-shadow: inset 0 0 0 1px var(--dz-outline);
+  }
+
+  .dz-btn--outlined[data-hover] {
+    background: color-mix(in srgb, var(--dz-primary) 8%, transparent);
+  }
+
+  .dz-btn--text {
+    --ss-button-height: 40px;
+    --ss-button-pad: 12px;
+    width: auto;
+    color: var(--dz-primary);
+  }
+
+  .dz-btn--tonal {
+    --ss-button-height: 40px;
+    color: var(--dz-on-secondary-container);
+    background: var(--dz-secondary-container);
+    box-shadow: none;
+  }
+
+  .dz-btn--hug {
+    width: auto;
+  }
+
+  /* ---- Capture, then generating ---- */
+
+  .dz-capture {
+    position: absolute;
+    inset: 0;
+    background: var(--dz-background);
+  }
+
+  .dz-fades {
+    transition: opacity 0.24s ease;
+  }
+
+  .dz-capture[data-gen] .dz-fades {
+    opacity: 0;
+  }
+
+  .dz-head {
+    position: absolute;
+    top: 64px;
+    right: 24px;
+    left: 24px;
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+  }
+
+  .dz-title {
+    font-size: 32px;
+    font-weight: 400;
+    line-height: 40px;
+    color: var(--dz-primary);
+  }
+
+  .dz-sub {
+    margin: 7.5px 0;
+  }
+
+  .dz-hint {
+    position: absolute;
+    top: 528px;
+    right: 24px;
+    left: 24px;
+    display: flex;
+    justify-content: center;
+    padding: 6px 0;
+  }
+
+  .dz-actions {
+    position: absolute;
+    top: 564px;
+    right: 24px;
+    left: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* The app spaces its outlined buttons 8dp; 12 keeps them clearly apart at this scale */
+    gap: 12px;
+  }
+
+  .dz-actions > .dz-btn--tall {
+    margin-bottom: 4px;
+  }
+
+  .dz-actions > .dz-btn--text {
+    margin-top: 4px;
+  }
+
+  /* The photo panel: a 364dp square, and the generating card it becomes */
+  .dz-panel {
+    position: absolute;
+    top: 148px;
+    left: 24px;
+    width: 364px;
+    height: 364px;
+    overflow: hidden;
+    border-radius: 24px;
+    background: var(--dz-container-high);
+    transition:
+      top 0.62s var(--dz-house),
+      height 0.62s var(--dz-house);
+  }
+
+  .dz-panel[data-gen] {
+    top: 376px;
+    height: 124px;
+  }
+
+  /* Handed to the preview: the face over it carries it from here */
+  .dz-panel[data-handed] {
+    visibility: hidden;
+  }
+
+  /* As the Expand's face it fills the box Expand gives it */
+  .dz-panel[data-face] {
+    position: relative;
+    top: 0;
+    left: 0;
+  }
+
+  .dz-panel__photo {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    width: 340px;
+    height: 340px;
+    border-radius: 0;
+    object-fit: cover;
+    transition:
+      top 0.62s var(--dz-house),
+      left 0.62s var(--dz-house),
+      width 0.62s var(--dz-house),
+      height 0.62s var(--dz-house),
+      border-radius 0.62s var(--dz-house);
+  }
+
+  .dz-panel[data-gen] .dz-panel__photo {
+    top: 16px;
+    left: 16px;
+    width: 72px;
+    height: 72px;
+    border-radius: 12px;
+  }
+
+  .dz-panel__text {
+    position: absolute;
+    top: 30px;
+    right: 16px;
+    left: 104px;
+    display: grid;
+    opacity: 0;
+    transition: opacity 0.18s ease;
+  }
+
+  .dz-panel__title {
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0.15px;
+    line-height: 24px;
+    white-space: nowrap;
+    color: var(--dz-on-surface);
+  }
+
+  .dz-panel__sub {
+    font-size: 14px;
+    letter-spacing: 0.25px;
+    line-height: 20px;
+    white-space: nowrap;
+    color: var(--dz-on-surface-variant);
+  }
+
+  /* Material 3's linear progress: the track in secondary container */
+  .dz-progress {
+    position: absolute;
+    top: 104px;
+    right: 16px;
+    left: 16px;
+    height: 4px;
+    overflow: hidden;
+    border-radius: 2px;
+    background: var(--dz-secondary-container);
+    opacity: 0;
+    transition: opacity 0.18s ease;
+  }
+
+  .dz-progress__fill {
+    position: absolute;
+    inset: 0;
+    border-radius: 2px;
+    background: var(--dz-primary);
+    transform-origin: 0 50%;
+    transition: transform 2.6s cubic-bezier(0.4, 0, 0.3, 1);
+  }
+
+  .dz-panel[data-gen] .dz-panel__text,
+  .dz-panel[data-gen] .dz-progress {
+    opacity: 1;
+    transition: opacity 0.32s ease 0.42s;
+  }
+
+  .dz-cancel {
+    position: absolute;
+    top: 524px;
+    right: 24px;
+    left: 24px;
+    display: flex;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .dz-capture[data-gen] .dz-cancel {
+    opacity: 1;
+    transition: opacity 0.32s ease 0.48s;
+  }
+
+  /* ---- The 3D preview ---- */
+
+  .dz-preview {
+    position: absolute;
+    inset: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease;
+  }
+
+  .dz-preview[data-launch] {
+    visibility: visible;
+  }
+
+  .dz-preview[data-leaving] {
+    opacity: 0;
+  }
+
+  .dz-expand {
+    --ss-expand-bg: var(--dz-background);
+  }
+
+  .dz-view {
+    position: absolute;
+    inset: 0;
+    background: var(--dz-background);
+  }
+
+  /* The model's frames, 9 across and 8 down; Turntable picks the frame */
+  .dz-turn {
+    position: absolute;
+    top: 160px;
+    left: 54px;
+    width: 304px;
+    height: 440px;
+    background-repeat: no-repeat;
+    background-size: 900% 800%;
+  }
+
+  .dz-ready {
+    position: absolute;
+    right: 24px;
+    bottom: 48px;
+    left: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .dz-ready__hint {
+    font-size: 14px;
+    letter-spacing: 0.25px;
+    line-height: 20px;
+    color: var(--dz-on-surface-variant);
+  }
+
+  /* ---- AR ---- */
+
+  .dz-ar {
+    position: absolute;
+    inset: 0;
+    background: #2a2622;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.34s ease,
+      visibility 0s linear 0.34s;
+  }
+
+  .dz-ar[data-on] {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.34s ease;
+  }
+
+  .dz-ar__room,
+  .dz-ar__plane,
+  .dz-ar__model {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 412px;
+    height: 915px;
+  }
+
+  .dz-ar__plane {
+    transition: opacity 0.6s ease 0.1s;
+  }
+
+  .dz-ar[data-placed] .dz-ar__plane {
+    opacity: 0;
+  }
+
+  /* The model lands on its anchor: a small settle from just above, its shadow with it */
+  .dz-ar__model {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.96);
+    transition:
+      opacity 0.22s ease,
+      transform 0.46s var(--dz-settle);
+  }
+
+  .dz-ar[data-placed] .dz-ar__model {
+    opacity: 1;
+    transform: none;
+  }
+
+  .dz-ar__floor {
+    position: absolute;
+    width: 80px;
+    height: 40px;
+  }
+
+  /* FilledTonalIconButton, 8dp inside the safe area */
+  .dz-back {
+    position: absolute;
+    top: 56px;
+    left: 8px;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    color: var(--dz-on-secondary-container);
+    background: var(--dz-secondary-container);
+    transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .dz-back[data-pressed] {
+    transform: scale(0.94);
+  }
+
+  .dz-ar__controls {
+    position: absolute;
+    right: 16px;
+    bottom: 40px;
+    left: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .dz-ar__rise {
+    display: flex;
+    will-change: transform;
+    opacity: 0;
+    transform: translateY(8px);
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .dz-ar[data-placed] .dz-ar__rise {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.32s ease calc(0.18s + var(--i) * 70ms),
+      transform 0.42s var(--dz-settle) calc(0.18s + var(--i) * 70ms);
+  }
+
+  /* SizeSlider: zoom out, the track, zoom in, the percent, on the camera scrim */
+  .dz-slider {
+    box-sizing: border-box;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    height: 52px;
+    padding: 0 12px;
+    border-radius: 24px;
+    color: #fff;
+    background: var(--dz-scrim);
+  }
+
+  .dz-slider > svg {
+    flex: none;
+  }
+
+  .dz-slider__track {
+    display: grid;
+    flex: 1;
+    grid-template-columns: 1fr 4px 1fr;
+    align-items: center;
+    gap: 6px;
+    height: 44px;
+  }
+
+  .dz-slider__active,
+  .dz-slider__rest {
+    height: 16px;
+    border-radius: 8px 2px 2px 8px;
+    background: #fff;
+  }
+
+  .dz-slider__rest {
+    border-radius: 2px 8px 8px 2px;
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .dz-slider__thumb {
+    height: 44px;
+    border-radius: 2px;
+    background: #fff;
+  }
+
+  .dz-slider__value {
+    flex: none;
+    width: 44px;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.1px;
+    line-height: 20px;
+    text-align: right;
+  }
+
+  .dz-ar__hint {
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    letter-spacing: 0.25px;
+    line-height: 20px;
+    text-align: center;
+    color: #fff;
+    background: var(--dz-scrim);
+  }
+}
+

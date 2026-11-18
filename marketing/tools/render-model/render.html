@@ -1,0 +1,205 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+} }
+</script>
+<style>body{margin:0;background:transparent}</style>
+</head><body>
+<script type="module">
+import * as THREE from 'three'
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true })
+renderer.shadowMap.enabled = true
+renderer.shadowMap.type = THREE.VSMShadowMap
+renderer.outputColorSpace = THREE.SRGBColorSpace
+renderer.toneMapping = THREE.ACESFilmicToneMapping
+renderer.toneMappingExposure = 1.0
+document.body.appendChild(renderer.domElement)
+const pmrem = new THREE.PMREMGenerator(renderer)
+const envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
+
+const gltf = await new GLTFLoader().loadAsync('/fridge.glb')
+const base = gltf.scene
+base.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true } })
+
+// A copy of the model, its height `h` metres, standing on y=0, centred on x/z
+function model(h) {
+  const g = base.clone(true)
+  const box = new THREE.Box3().setFromObject(g)
+  const size = box.getSize(new THREE.Vector3())
+  const s = h / size.y
+  g.scale.setScalar(s)
+  const b2 = new THREE.Box3().setFromObject(g)
+  const c = b2.getCenter(new THREE.Vector3())
+  g.position.sub(new THREE.Vector3(c.x, b2.min.y, c.z))
+  const pivot = new THREE.Group(); pivot.add(g)
+  pivot.userData.size = b2.getSize(new THREE.Vector3())
+  return pivot
+}
+
+function keyLight(scene, pos, target, intensity = 2.2, area = 1.2, radius = 6) {
+  const d = new THREE.DirectionalLight(0xffffff, intensity)
+  d.position.copy(pos); d.target.position.copy(target)
+  d.castShadow = true
+  d.shadow.mapSize.set(2048, 2048)
+  d.shadow.camera.left = -area; d.shadow.camera.right = area; d.shadow.camera.top = area; d.shadow.camera.bottom = -area
+  d.shadow.camera.near = 0.1; d.shadow.camera.far = 20
+  d.shadow.radius = radius; d.shadow.blurSamples = 16
+  d.shadow.bias = -0.0005
+  scene.add(d, d.target)
+  return d
+}
+
+function shot(w, h, scene, cam, type = 'image/png', q) {
+  renderer.setPixelRatio(1)
+  renderer.setSize(w, h, false)
+  cam.aspect = w / h; cam.updateProjectionMatrix()
+  renderer.setClearColor(0x000000, 0)
+  renderer.render(scene, cam)
+  return renderer.domElement.toDataURL(type, q)
+}
+
+// ---- Turntable: the model alone over a shadow catcher, transparent ----
+window.turntable = (frames, w, h) => {
+  const scene = new THREE.Scene(); scene.environment = envTex
+  const m = model(1); scene.add(m)
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(6, 6), new THREE.ShadowMaterial({ opacity: 0.22 }))
+  floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor)
+  keyLight(scene, new THREE.Vector3(0.6, 4, 1.2), new THREE.Vector3(0, 0, 0), 1.6, 1.2, 10)
+  const cam = new THREE.PerspectiveCamera(30, w / h, 0.1, 50)
+  cam.position.set(0, 1.25, 3.2); cam.lookAt(0, 0.47, 0)
+  const out = []
+  for (let i = 0; i < frames; i++) {
+    m.rotation.y = -1.7 + (i / frames) * Math.PI * 2
+    out.push(shot(w, h, scene, cam))
+  }
+  return out
+}
+
+// ---- Floor texture: light oak planks, drawn ----
+function planks() {
+  const c = document.createElement('canvas'); c.width = 2048; c.height = 2048
+  const x = c.getContext('2d')
+  const rows = 10, pw = 2048 / rows
+  let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647)
+  for (let r = 0; r < rows; r++) {
+    let y = -rnd() * 900
+    while (y < 2048) {
+      const len = 700 + rnd() * 900
+      const l = 60 + rnd() * 9, sat = 34 + rnd() * 12, hue = 30 + rnd() * 6
+      x.fillStyle = `hsl(${hue} ${sat}% ${l}%)`
+      x.fillRect(r * pw, y, pw, len)
+      for (let k = 0; k < 60; k++) {
+        x.strokeStyle = `hsla(${hue - 4} ${sat + 10}% ${l - 12 - rnd() * 10}% / ${0.08 + rnd() * 0.12})`
+        x.lineWidth = 1 + rnd() * 2
+        const gx = r * pw + rnd() * pw
+        x.beginPath(); x.moveTo(gx, y); x.bezierCurveTo(gx + rnd() * 12 - 6, y + len / 3, gx + rnd() * 12 - 6, y + len * 0.66, gx + rnd() * 8 - 4, y + len); x.stroke()
+      }
+      x.fillStyle = 'rgba(90,60,30,0.35)'; x.fillRect(r * pw, y, pw, 3)
+      y += len
+    }
+    x.fillStyle = 'rgba(90,60,30,0.4)'; x.fillRect(r * pw, 0, 2, 2048)
+  }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(4.4, 4.4); t.anisotropy = 8
+  return t
+}
+
+// The room as a phone camera sees it: floor, back wall, a skirting board
+function roomScene() {
+  const scene = new THREE.Scene(); scene.environment = envTex
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(8, 8), new THREE.MeshStandardMaterial({ map: planks(), roughness: 0.55, metalness: 0 }))
+  floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0xe2dccf, roughness: 0.95 })
+  const wall = new THREE.Mesh(new THREE.PlaneGeometry(8, 4), wallMat); wall.position.set(0, 2, -2.6); wall.receiveShadow = true
+  const side = new THREE.Mesh(new THREE.PlaneGeometry(8, 4), new THREE.MeshStandardMaterial({ color: 0xd6cfc1, roughness: 0.95 }))
+  side.rotation.y = Math.PI / 2; side.position.set(-0.85, 2, 1.4); side.receiveShadow = true
+  const skirt = new THREE.Mesh(new THREE.BoxGeometry(8, 0.09, 0.02), new THREE.MeshStandardMaterial({ color: 0xf6f4f0, roughness: 0.6 }))
+  skirt.position.set(0, 0.045, -2.59)
+  const skirt2 = skirt.clone(); skirt2.rotation.y = Math.PI / 2; skirt2.position.set(-0.84, 0.045, 1.4)
+  scene.add(floor, wall, side, skirt, skirt2)
+  scene.environmentIntensity = 0.55
+  return scene
+}
+function arCam() {
+  const cam = new THREE.PerspectiveCamera(60, 412 / 915, 0.05, 50)
+  cam.position.set(0.2, 1.3, 0.6); cam.lookAt(-0.05, 0.05, -1.25)
+  return cam
+}
+const SPOT = new THREE.Vector3(0.0, 0, -1.25)
+const AR_H = 0.62
+
+window.room = (w, h) => {
+  const scene = roomScene()
+  scene.add(new THREE.HemisphereLight(0xfff4e6, 0x6b5a46, 0.35))
+  keyLight(scene, new THREE.Vector3(1.4, 3.6, 0.8), SPOT, 1.5, 3, 14)
+  const warm = new THREE.PointLight(0xffd9a8, 6, 4, 2); warm.position.set(0.9, 1.6, -1.6); scene.add(warm)
+  renderer.toneMappingExposure = 0.9
+  const r = shot(w, h, scene, arCam(), 'image/jpeg', 0.9)
+  renderer.toneMappingExposure = 1.0
+  return r
+}
+// The model placed, with only its shadow on a transparent floor, from the same camera
+window.placed = (w, h) => {
+  const scene = new THREE.Scene(); scene.environment = envTex
+  const m = model(AR_H); m.position.copy(SPOT); m.rotation.y = -0.35; scene.add(m)
+  scene.environmentIntensity = 0.7
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(8, 8), new THREE.ShadowMaterial({ opacity: 0.32 }))
+  floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor)
+  keyLight(scene, new THREE.Vector3(1.4, 3.6, 0.8), SPOT, 1.6, 1.4, 12)
+  return shot(w, h, scene, arCam())
+}
+// Where SPOT lands on the screen, 0..1, for the reticle and the tap
+window.spot = () => {
+  const cam = arCam(); cam.aspect = 412 / 915; cam.updateProjectionMatrix(); cam.updateMatrixWorld()
+  const p = SPOT.clone().project(cam)
+  return { x: (p.x + 1) / 2, y: (1 - p.y) / 2 }
+}
+// ARCore's plane: white dots on the detected floor, fading out at its edge
+window.plane = (w, h) => {
+  const scene = new THREE.Scene()
+  const c = document.createElement('canvas'); c.width = c.height = 64
+  const x = c.getContext('2d'); x.fillStyle = '#fff'; x.beginPath(); x.arc(32, 32, 7, 0, Math.PI * 2); x.fill()
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(26, 26)
+  const fade = document.createElement('canvas'); fade.width = fade.height = 256
+  const f = fade.getContext('2d'); const g = f.createRadialGradient(128, 128, 30, 128, 128, 128)
+  g.addColorStop(0, '#fff'); g.addColorStop(0.7, '#fff'); g.addColorStop(1, '#000'); f.fillStyle = g; f.fillRect(0, 0, 256, 256)
+  const mat = new THREE.MeshBasicMaterial({ map: t, alphaMap: new THREE.CanvasTexture(fade), transparent: true, opacity: 0.8, depthWrite: false })
+  const p = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 3.2), mat); p.rotation.x = -Math.PI / 2; p.position.set(-0.1, 0.002, -1.2)
+  scene.add(p)
+  return shot(w, h, scene, arCam())
+}
+
+// ---- The input photo: the model on a seamless paper sweep, square ----
+window.photo = (w) => {
+  const scene = new THREE.Scene(); scene.environment = envTex
+  const m = model(1); m.rotation.y = -0.5; scene.add(m)
+  // A curved backdrop: floor running up into a wall
+  const shape = new THREE.Shape()
+  const curve = new THREE.CurvePath()
+  const pts = []
+  for (let i = 0; i <= 40; i++) { const a = (i / 40) * Math.PI / 2; pts.push(new THREE.Vector2(-0.8 - Math.sin(a) * 0.8 + 0.8, 0.8 - Math.cos(a) * 0.8)) }
+  const prof = [new THREE.Vector2(3, 0), ...pts.map((p) => new THREE.Vector2(p.x - 1.6, p.y)), new THREE.Vector2(-2.4, 4)]
+  const geo = new THREE.BufferGeometry()
+  const pos = [], idx = []
+  prof.forEach((p, i) => { pos.push(-4, p.y, p.x, 4, p.y, p.x); if (i) { const a = (i - 1) * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2) } })
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setIndex(idx); geo.computeVertexNormals()
+  const sweep = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0xc9cfd4, roughness: 1, side: THREE.DoubleSide }))
+  sweep.receiveShadow = true; scene.add(sweep)
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xb0b4b8, 0.6))
+  keyLight(scene, new THREE.Vector3(-1.6, 3.2, 2.2), new THREE.Vector3(0, 0.3, 0), 1.5, 1.6, 18)
+  const cam = new THREE.PerspectiveCamera(32, 1, 0.1, 50)
+  cam.position.set(0.15, 0.95, 2.7); cam.lookAt(0, 0.5, 0)
+  renderer.toneMappingExposure = 0.85
+  const r = shot(w, w, scene, cam, 'image/jpeg', 0.92)
+  renderer.toneMappingExposure = 1.0
+  return r
+}
+window.ready = true
+</script>
+</body></html>

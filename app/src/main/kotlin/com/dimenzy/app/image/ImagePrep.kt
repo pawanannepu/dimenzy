@@ -22,9 +22,16 @@ class ImagePrep(
   val preparedPhoto: File,
 ) {
 
+  /** The last thumbnail decoded, kept so the next screen shows it on its first frame (the photo's shared transition). */
+  @Volatile private var lastThumbnail: Bitmap? = null
+
   fun hasPreparedPhoto(): Boolean = preparedPhoto.isFile
 
+  /** The thumbnail already in memory, or `null` if none was decoded since the photo last changed. */
+  fun cachedThumbnail(): Bitmap? = lastThumbnail?.takeIf { preparedPhoto.isFile }
+
   suspend fun prepare(source: Uri): PhotoOutcome = withContext(Dispatchers.IO) {
+    lastThumbnail = null
     try {
       val bitmap = decodeUpright(source) ?: return@withContext PhotoOutcome.Failed(PhotoError.Unreadable)
       writeAtomically(bitmap)
@@ -48,6 +55,7 @@ class ImagePrep(
   suspend fun loadThumbnail(): Bitmap? = withContext(Dispatchers.IO) {
     if (!preparedPhoto.isFile) return@withContext null
     BitmapFactory.decodeFile(preparedPhoto.path, BitmapFactory.Options().apply { inSampleSize = 2 })
+      .also { lastThumbnail = it }
   }
 
   private fun decodeUpright(source: Uri): Bitmap? {

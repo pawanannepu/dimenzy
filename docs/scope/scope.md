@@ -16,8 +16,8 @@ _These are recommendations to keep your build orderly, not requirements. Skip an
 | 1 | Stack & architecture | Foundation | done |
 | 2 | Coding standards & tooling | Foundation | done |
 | 3 | Photo to 3D model | Release 1 | done |
-| 4 | Place the model in AR | Release 1 | planned |
-| 5 | Release APK | Release 1 | planned |
+| 4 | Place the model in AR | Release 1 | done |
+| 5 | Release APK | Release 1 | in-progress |
 | 6 | Saved model library | Release 2 | planned |
 | 7 | Real size entry | Release 2 | planned |
 
@@ -48,15 +48,23 @@ spec [0002](../specs/0002-photo-to-3d-model.md) · code in `app/src/main/kotlin/
   - [x] Slice 3: camera capture through the FileProvider, behind the permission (AC-2, AC-4)
   - [x] Slice 4: every generation error has its message, Retry, and next step, then a full phone check (AC-10, AC-11)
 
-### 4. Place the model in AR · needs a decision
+### 4. Place the model in AR
 Open the camera in AR, find a floor or table surface, and tap to place the generated model. Pinch to scale, twist or drag to rotate.
 **Done when:** on your phone, the model sits on a detected surface and stays put as you walk around it, pinch and rotate work, and a phone without AR support gets a clear message instead of a crash.
-- [ ] Design it (spec): `/architect place the model in AR`
+spec [0003](../specs/0003-place-model-in-ar.md) · code in `app/src/main/kotlin/com/dimenzy/app/ui/ar/`
+- [x] Design it (spec): `/architect place the model in AR`
+- [x] Build it: `/develop place the model in AR`
+  - [x] Slice 1: the sample model stands on your floor, with Place in AR, PlacementScene, gestures, and tap to move (AC-1, AC-5, AC-6, AC-7, AC-8, AC-9, AC-10)
+  - [x] Slice 2: Reset, the hint line, loading and load failure, and the tracking hint check (AC-10, AC-11, AC-12, AC-13)
+  - [x] Slice 3: the readiness gate for ARCore support, install, and camera, checked again on resume (AC-2, AC-3, AC-4, AC-5, AC-14)
+  - [x] Slice 4: a full phone check with a freshly generated model (AC-1 to AC-14)
+  - Checked on a moto edge 50 fusion (placement, shadow, drag, pinch, rotate, tap to move, hint, Reset, Back, resume) and on two vivo phones without ARCore (clear message, no crash). Skipped, marked done by you: walk around (AC-8), tracking loss hint (AC-12), camera denied (AC-5), install prompt (AC-4), camera busy (AC-14), load failure (AC-13), a freshly generated model in AR.
 
 ### 5. Release APK
 Build a signed release APK once you've confirmed features 3 and 4 work on your phone.
 **Done when:** a signed release APK installs on a clean phone and runs the full photo to 3D to AR loop.
-- [ ] Build it: `/develop release APK`
+- [x] Build it: `/develop release APK`
+- Code in `app/build.gradle.kts` (signing from `local.properties`); output `app/build/outputs/apk/release/app-release.apk`
 
 ## Release 2: Grow it (only if time is left)
 

@@ -1,11 +1,13 @@
 package com.dimenzy.app.ui.generate
 
+import android.graphics.Bitmap
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dimenzy.app.data.GenerateError
 import com.dimenzy.app.data.GenerateOutcome
 import com.dimenzy.app.data.ModelRepository
+import com.dimenzy.app.image.ImagePrep
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,14 +29,21 @@ sealed interface GenerateUiState {
 class GenerateViewModel(
   private val savedState: SavedStateHandle,
   private val repository: ModelRepository,
+  private val imagePrep: ImagePrep,
 ) : ViewModel() {
 
   private val _state = MutableStateFlow<GenerateUiState>(GenerateUiState.Working)
   val state: StateFlow<GenerateUiState> = _state.asStateFlow()
 
+  /** The photo being sent, for the working card; null until it loads (or if the file is gone). */
+  // Starts with the capture screen's thumbnail, so the photo's shared transition has it on the first frame.
+  private val _thumbnail = MutableStateFlow(imagePrep.cachedThumbnail())
+  val thumbnail: StateFlow<Bitmap?> = _thumbnail.asStateFlow()
+
   private var job: Job? = null
 
   init {
+    if (_thumbnail.value == null) viewModelScope.launch { _thumbnail.value = imagePrep.loadThumbnail() }
     val result = savedState.get<String>(KEY_RESULT)
     when {
       // Finished while the app was in the background, then Android killed it: the model is already saved.

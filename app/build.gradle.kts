@@ -24,10 +24,30 @@ android {
     buildConfigField("String", "STABILITY_API_KEY", "\"${localProps.getProperty("STABILITY_API_KEY", "")}\"")
   }
 
+  // Release signing from local.properties (spec 0001, feature 5). Missing values leave the release unsigned.
+  val releaseStoreFile = localProps.getProperty("RELEASE_STORE_FILE")
+  val releaseStorePassword = localProps.getProperty("RELEASE_STORE_PASSWORD")
+  val releaseKeyAlias = localProps.getProperty("RELEASE_KEY_ALIAS")
+  val releaseKeyPassword = localProps.getProperty("RELEASE_KEY_PASSWORD")
+  val hasReleaseSigning = listOf(releaseStoreFile, releaseStorePassword, releaseKeyAlias, releaseKeyPassword)
+    .all { !it.isNullOrBlank() }
+
+  signingConfigs {
+    if (hasReleaseSigning) {
+      create("release") {
+        storeFile = file(releaseStoreFile.orEmpty())
+        storePassword = releaseStorePassword
+        keyAlias = releaseKeyAlias
+        keyPassword = releaseKeyPassword
+      }
+    }
+  }
+
   buildTypes {
     release {
       // R8 can break Filament and Retrofit without keep rules; spec 0001 leaves it off.
       isMinifyEnabled = false
+      if (hasReleaseSigning) signingConfig = signingConfigs.getByName("release")
     }
   }
   compileOptions {

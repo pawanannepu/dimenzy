@@ -16,26 +16,33 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import com.dimenzy.app.ui.common.DimenzyOutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dimenzy.app.image.PhotoError
+import com.dimenzy.app.ui.common.CameraAccess
+import com.dimenzy.app.ui.common.SamplePickerSheet
+import com.dimenzy.app.ui.common.rememberCameraPermission
 
 /** Capture: take or pick a photo, see it, then confirm with "Generate 3D model" (the paid call). */
 @Composable
 fun CaptureScreen(
   viewModel: CaptureViewModel,
   onGenerate: () -> Unit,
-  onTrySample: () -> Unit,
+  onTrySample: (modelId: String) -> Unit,
 ) {
+  var showSamples by rememberSaveable { mutableStateOf(false) }
   val state by viewModel.state.collectAsStateWithLifecycle()
 
   val takePicture = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture(), viewModel::onCameraResult)
@@ -89,11 +96,11 @@ fun CaptureScreen(
         ) { Text("Generate 3D model", style = MaterialTheme.typography.titleMedium) }
       }
 
-      Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-        OutlinedButton(onClick = { camera.request(openCamera) }, modifier = Modifier.fillMaxWidth().height(48.dp)) {
+      Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+        DimenzyOutlinedButton(onClick = { camera.request(openCamera) }, modifier = Modifier.fillMaxWidth().height(48.dp)) {
           Text("Take photo")
         }
-        OutlinedButton(
+        DimenzyOutlinedButton(
           onClick = { pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
           modifier = Modifier.fillMaxWidth().height(48.dp),
         ) { Text("Choose from gallery") }
@@ -103,8 +110,18 @@ fun CaptureScreen(
         CameraDenied(onTryAgain = { camera.request(openCamera) }, onOpenSettings = camera::openSettings)
       }
 
-      TextButton(onClick = onTrySample) { Text("Try sample model") }
+      TextButton(onClick = { showSamples = true }) { Text("Try a sample model") }
     }
+  }
+
+  if (showSamples) {
+    SamplePickerSheet(
+      onPick = { modelId ->
+        showSamples = false
+        onTrySample(modelId)
+      },
+      onDismiss = { showSamples = false },
+    )
   }
 }
 

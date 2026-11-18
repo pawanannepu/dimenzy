@@ -65,6 +65,7 @@ Android Lint only (built in), formatting with Android Studio's Kotlin style. No 
 - [agp-9-upgrade](.claude/skills/agp-9-upgrade/): `android/skills`, AGP 9 build file changes
 - [r8-analyzer](.claude/skills/r8-analyzer/): `android/skills`, keep rules if you ever turn on R8
 - [android-cli](.claude/skills/android-cli/): `android/skills`, the `android` CLI (devices, screenshots, SDK)
+- [stageshow](.claude/skills/stageshow/): `benjitaylor/skills`, mock product UI and animated cursor demos (React + CSS) for marketing and docs visuals
 
 Declined: android-mcp-server, mcp-stable-fast-3d
 

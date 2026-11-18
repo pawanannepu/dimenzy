@@ -23,12 +23,15 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.dimenzy.app.ui.common.sharedPhoto
+import com.dimenzy.app.ui.common.sharedPhotoCard
 
 /** The square frame above the buttons: an empty hint, a spinner while preparing, or the prepared photo. */
 @Composable
 fun PhotoPanel(photo: PhotoState, modifier: Modifier = Modifier) {
   Surface(
-    modifier = modifier.fillMaxWidth().aspectRatio(1f),
+    // Tapping Generate shrinks this panel into the generating card; New photo brings the preview back into it
+    modifier = modifier.sharedPhotoCard().fillMaxWidth().aspectRatio(1f),
     shape = RoundedCornerShape(24.dp),
     color = MaterialTheme.colorScheme.surfaceContainerHigh,
   ) {
@@ -48,7 +51,8 @@ fun PhotoPanel(photo: PhotoState, modifier: Modifier = Modifier) {
               bitmap = image,
               contentDescription = "Your photo",
               contentScale = ContentScale.Fit,
-              modifier = Modifier.fillMaxSize().padding(12.dp),
+              // The same photo becomes the generating card's thumbnail
+              modifier = Modifier.fillMaxSize().padding(12.dp).sharedPhoto(),
             )
           }
         }

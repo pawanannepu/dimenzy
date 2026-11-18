@@ -20,3 +20,9 @@ local.properties
 # env variables
 .env
 .env.*
+
+# assets
+/assets
+
+# node (stageshow playground, marketing visuals)
+node_modules/

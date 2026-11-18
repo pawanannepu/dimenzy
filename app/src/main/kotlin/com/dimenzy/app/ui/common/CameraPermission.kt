@@ -1,4 +1,4 @@
-package com.dimenzy.app.ui.capture
+package com.dimenzy.app.ui.common
 
 import android.Manifest
 import android.content.Context

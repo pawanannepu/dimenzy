@@ -10,6 +10,8 @@ import com.dimenzy.app.data.ModelStore
 import com.dimenzy.app.data.StabilityApi
 import com.dimenzy.app.image.CameraShots
 import com.dimenzy.app.image.ImagePrep
+import com.dimenzy.app.ui.ar.ArCoreCheck
+import com.dimenzy.app.ui.ar.ArViewModel
 import com.dimenzy.app.ui.capture.CaptureViewModel
 import com.dimenzy.app.ui.generate.GenerateViewModel
 import com.dimenzy.app.ui.preview.PreviewViewModel
@@ -56,11 +58,17 @@ class AppContainer(private val app: Application) {
   }
 
   val generateViewModelFactory: ViewModelProvider.Factory = viewModelFactory {
-    initializer { GenerateViewModel(createSavedStateHandle(), modelRepository) }
+    initializer { GenerateViewModel(createSavedStateHandle(), modelRepository, imagePrep) }
   }
 
   val previewViewModelFactory: ViewModelProvider.Factory = viewModelFactory {
     initializer { PreviewViewModel(createSavedStateHandle(), modelStore) }
+  }
+
+  val arCoreCheck: ArCoreCheck by lazy { ArCoreCheck(app) }
+
+  val arViewModelFactory: ViewModelProvider.Factory = viewModelFactory {
+    initializer { ArViewModel(createSavedStateHandle(), modelStore) }
   }
 
   private companion object {
